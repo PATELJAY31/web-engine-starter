@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import Layout from "@/components/Layout";
 import { 
   Receipt, 
   TrendingUp, 
@@ -11,7 +12,6 @@ import {
   XCircle, 
   Clock,
   Wallet,
-  LogOut,
   FileText
 } from "lucide-react";
 
@@ -36,7 +36,6 @@ const Dashboard = () => {
     allocatedAmount: 0,
   });
   const [userRole, setUserRole] = useState<string>("employee");
-  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     fetchDashboardData();
@@ -48,17 +47,6 @@ const Dashboard = () => {
       if (!user) {
         navigate('/auth');
         return;
-      }
-
-      // Fetch user profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', user.id)
-        .single();
-
-      if (profile) {
-        setUserName(`${profile.first_name} ${profile.last_name}`);
       }
 
       // Fetch user role
@@ -109,11 +97,6 @@ const Dashboard = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
-    toast.success("Signed out successfully");
-  };
 
   if (loading) {
     return (
@@ -155,27 +138,8 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Bill Blister
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Welcome back, {userName}
-            </p>
-          </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
-          </Button>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+    <Layout>
+      <div className="space-y-8">
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {statCards.map((stat) => (
@@ -274,8 +238,8 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Wallet } from "lucide-react";
+import Layout from "@/components/Layout";
+import { Wallet } from "lucide-react";
 
 interface Allocation {
   id: string;
@@ -61,22 +62,15 @@ const Allocations = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Budget Allocations</h1>
-            <p className="text-sm text-muted-foreground">
-              View your allocated budgets by expense type
-            </p>
-          </div>
+    <Layout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold">Budget Allocations</h1>
+          <p className="text-muted-foreground">
+            View your allocated budgets by expense type
+          </p>
         </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
         <Card className="mb-8 shadow-lg bg-gradient-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -147,8 +141,8 @@ const Allocations = () => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

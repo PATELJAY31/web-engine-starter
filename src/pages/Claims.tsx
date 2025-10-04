@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Receipt, Clock, CheckCircle, XCircle } from "lucide-react";
+import Layout from "@/components/Layout";
+import { Plus, Receipt, Clock, CheckCircle, XCircle } from "lucide-react";
 
 interface ExpenseType {
   id: string;
@@ -133,28 +134,21 @@ const Claims = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold">Expense Claims</h1>
-              <p className="text-sm text-muted-foreground">
-                Submit and track your expense claims
-              </p>
-            </div>
+    <Layout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Expense Claims</h1>
+            <p className="text-muted-foreground">
+              Submit and track your expense claims
+            </p>
           </div>
           <Button onClick={() => setShowForm(!showForm)}>
             <Plus className="h-4 w-4 mr-2" />
             New Claim
           </Button>
         </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
         {showForm && (
           <Card className="mb-8 shadow-lg">
             <CardHeader>
@@ -300,8 +294,8 @@ const Claims = () => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
