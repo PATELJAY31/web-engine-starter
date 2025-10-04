@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
+import { fixSpecificAdminUser, createDatabaseSchema } from "@/utils/setupAdmin";
 import { 
   FileText, 
   Users, 
@@ -238,6 +239,27 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={async () => {
+                const success = await createDatabaseSchema();
+              }}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Check Database
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={async () => {
+                const success = await fixSpecificAdminUser();
+                if (success) {
+                  window.location.reload();
+                }
+              }}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Fix Admin Setup
+            </Button>
             <Button onClick={() => navigate('/invoices')}>
               <Plus className="h-4 w-4 mr-2" />
               New Invoice

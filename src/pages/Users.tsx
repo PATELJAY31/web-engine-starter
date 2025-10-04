@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Users, Plus, Search, Edit, Trash2, UserPlus, Eye, Mail, Phone, Shield, Calendar, Database } from "lucide-react";
 import { toast } from "sonner";
-import { setupAdminUser, createSampleData, fixAdminRole } from "@/utils/setupAdmin";
+import { setupAdminUser, createSampleData, fixAdminRole, createCompleteAdminSetup, fixSpecificAdminUser } from "@/utils/setupAdmin";
 
 interface UserProfile {
   id: string;
@@ -411,6 +411,32 @@ const Users = () => {
             >
               <Shield className="h-4 w-4 mr-2" />
               Fix Admin Role
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={async () => {
+                const success = await createCompleteAdminSetup();
+                if (success) {
+                  // Refresh the page to show updated data
+                  window.location.reload();
+                }
+              }}
+            >
+              <Database className="h-4 w-4 mr-2" />
+              Complete Admin Setup
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={async () => {
+                const success = await fixSpecificAdminUser();
+                if (success) {
+                  // Refresh the page to show updated data
+                  window.location.reload();
+                }
+              }}
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Fix This Admin User
             </Button>
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
