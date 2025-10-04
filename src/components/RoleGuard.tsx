@@ -30,18 +30,18 @@ const RoleGuard = ({ children, allowedRoles, fallbackPath = "/dashboard" }: Role
       }
 
       const { data: roleData } = await supabase
-        .from('user_roles')
+        .from('user_profiles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single();
 
       if (roleData) {
         setUserRole(roleData.role);
         setHasAccess(allowedRoles.includes(roleData.role));
       } else {
-        // If no role found, default to employee
-        setUserRole("employee");
-        setHasAccess(allowedRoles.includes("employee"));
+        // If no role found, default to viewer
+        setUserRole("viewer");
+        setHasAccess(allowedRoles.includes("viewer"));
       }
     } catch (error) {
       console.error("Error checking user role:", error);

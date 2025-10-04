@@ -7,14 +7,16 @@ import { AuthGuard } from "./components/AuthGuard";
 import RoleGuard from "./components/RoleGuard";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
-import Claims from "./pages/Claims";
-import Allocations from "./pages/Allocations";
-import Verification from "./pages/Verification";
-import Approval from "./pages/Approval";
-import Employees from "./pages/Employees";
-import ExpenseTypes from "./pages/ExpenseTypes";
-import AdminAllocations from "./pages/AdminAllocations";
+import Customers from "./pages/Customers";
+import Products from "./pages/Products";
+import Invoices from "./pages/Invoices";
+import Estimates from "./pages/Estimates";
+import Payments from "./pages/Payments";
 import Reports from "./pages/Reports";
+import Notifications from "./pages/Notifications";
+import Users from "./pages/Users";
+import Settings from "./pages/Settings";
+import DatabaseViewer from "./pages/DatabaseViewer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,14 +31,16 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
-          <Route path="/claims" element={<AuthGuard><Claims /></AuthGuard>} />
-          <Route path="/allocations" element={<AuthGuard><Allocations /></AuthGuard>} />
-          <Route path="/verification" element={<AuthGuard><RoleGuard allowedRoles={["engineer", "admin"]}><Verification /></RoleGuard></AuthGuard>} />
-          <Route path="/approval" element={<AuthGuard><RoleGuard allowedRoles={["approver", "admin"]}><Approval /></RoleGuard></AuthGuard>} />
-          <Route path="/employees" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><Employees /></RoleGuard></AuthGuard>} />
-          <Route path="/expense-types" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><ExpenseTypes /></RoleGuard></AuthGuard>} />
-          <Route path="/admin-allocations" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><AdminAllocations /></RoleGuard></AuthGuard>} />
-          <Route path="/reports" element={<AuthGuard><RoleGuard allowedRoles={["admin", "approver"]}><Reports /></RoleGuard></AuthGuard>} />
+          <Route path="/customers" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Customers /></RoleGuard></AuthGuard>} />
+          <Route path="/products" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales"]}><Products /></RoleGuard></AuthGuard>} />
+          <Route path="/invoices" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Invoices /></RoleGuard></AuthGuard>} />
+          <Route path="/estimates" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Estimates /></RoleGuard></AuthGuard>} />
+          <Route path="/payments" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Payments /></RoleGuard></AuthGuard>} />
+          <Route path="/reports" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "viewer"]}><Reports /></RoleGuard></AuthGuard>} />
+          <Route path="/notifications" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Notifications /></RoleGuard></AuthGuard>} />
+          <Route path="/users" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><Users /></RoleGuard></AuthGuard>} />
+          <Route path="/database" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><DatabaseViewer /></RoleGuard></AuthGuard>} />
+          <Route path="/settings" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><Settings /></RoleGuard></AuthGuard>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

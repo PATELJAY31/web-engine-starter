@@ -20,7 +20,7 @@ const Reports = () => {
               Analytics Dashboard
             </CardTitle>
             <CardDescription>
-              Detailed reports and insights for expense management
+              Detailed reports and insights for invoice management
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -28,12 +28,16 @@ const Reports = () => {
               This page will contain comprehensive reporting features:
             </p>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <li>• Interactive charts for expense trends and patterns</li>
-              <li>• Department-wise expense breakdowns</li>
-              <li>• Monthly and yearly expense reports</li>
-              <li>• Approval workflow statistics</li>
-              <li>• Budget utilization reports</li>
-              <li>• Export capabilities for all reports</li>
+              <li>• Sales reports by date, customer, and product</li>
+              <li>• Tax reports (GST/VAT collected and paid)</li>
+              <li>• Accounts receivable aging report</li>
+              <li>• Payment reports (paid vs unpaid)</li>
+              <li>• Customer analytics and insights</li>
+              <li>• Revenue trends and growth charts</li>
+              <li>• Invoice performance metrics</li>
+              <li>• Export reports to PDF/Excel</li>
+              <li>• Custom date range filtering</li>
+              <li>• Interactive charts and visualizations</li>
             </ul>
           </CardContent>
         </Card>

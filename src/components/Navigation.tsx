@@ -7,15 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { 
   LayoutDashboard, 
   FileText, 
-  Wallet, 
   Users, 
-  Settings, 
+  Package,
+  CreditCard,
   BarChart3,
-  CheckCircle,
-  UserCheck,
+  Settings,
+  Bell,
   LogOut,
   Menu,
-  X
+  X,
+  Receipt,
+  Calculator,
+  Database
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -41,66 +44,79 @@ const Navigation = () => {
       label: "Dashboard",
       icon: LayoutDashboard,
       path: "/dashboard",
-      roles: ["employee", "engineer", "approver", "admin"]
+      roles: ["admin", "accountant", "sales", "viewer"]
     },
     {
-      id: "claims",
-      label: "Claims",
-      icon: FileText,
-      path: "/claims",
-      roles: ["employee", "engineer", "approver", "admin"]
-    },
-    {
-      id: "allocations",
-      label: "Allocations",
-      icon: Wallet,
-      path: "/allocations",
-      roles: ["employee"]
-    },
-    {
-      id: "admin-allocations",
-      label: "Manage Allocations",
-      icon: Wallet,
-      path: "/admin-allocations",
-      roles: ["admin"],
-      badge: "Admin"
-    },
-    {
-      id: "verification",
-      label: "Verification",
-      icon: CheckCircle,
-      path: "/verification",
-      roles: ["engineer", "admin"],
-      badge: "Engineer"
-    },
-    {
-      id: "approval",
-      label: "Approval",
-      icon: UserCheck,
-      path: "/approval",
-      roles: ["approver", "admin"],
-      badge: "HO Approver"
-    },
-    {
-      id: "employees",
-      label: "Employees",
+      id: "customers",
+      label: "Customers",
       icon: Users,
-      path: "/employees",
-      roles: ["admin"]
+      path: "/customers",
+      roles: ["admin", "accountant", "sales", "viewer"]
     },
     {
-      id: "expense-types",
-      label: "Expense Types",
-      icon: Settings,
-      path: "/expense-types",
-      roles: ["admin"]
+      id: "products",
+      label: "Products & Services",
+      icon: Package,
+      path: "/products",
+      roles: ["admin", "accountant", "sales"]
+    },
+    {
+      id: "invoices",
+      label: "Invoices",
+      icon: FileText,
+      path: "/invoices",
+      roles: ["admin", "accountant", "sales", "viewer"]
+    },
+    {
+      id: "estimates",
+      label: "Estimates",
+      icon: Calculator,
+      path: "/estimates",
+      roles: ["admin", "accountant", "sales", "viewer"]
+    },
+    {
+      id: "payments",
+      label: "Payments",
+      icon: CreditCard,
+      path: "/payments",
+      roles: ["admin", "accountant", "sales", "viewer"]
     },
     {
       id: "reports",
       label: "Reports",
       icon: BarChart3,
       path: "/reports",
-      roles: ["admin", "approver"]
+      roles: ["admin", "accountant", "viewer"]
+    },
+    {
+      id: "notifications",
+      label: "Notifications",
+      icon: Bell,
+      path: "/notifications",
+      roles: ["admin", "accountant", "sales", "viewer"]
+    },
+    {
+      id: "users",
+      label: "User Management",
+      icon: Users,
+      path: "/users",
+      roles: ["admin"],
+      badge: "Admin"
+    },
+    {
+      id: "database",
+      label: "Database Viewer",
+      icon: Database,
+      path: "/database",
+      roles: ["admin"],
+      badge: "Admin"
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      path: "/settings",
+      roles: ["admin"]
     }
   ];
 
@@ -125,14 +141,14 @@ const Navigation = () => {
       }
 
       // Fetch user role
-      const { data: roleData } = await supabase
-        .from('user_roles')
+      const { data: profileData } = await supabase
+        .from('user_profiles')
         .select('role')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single();
 
-      if (roleData) {
-        setUserRole(roleData.role);
+      if (profileData) {
+        setUserRole(profileData.role);
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -203,7 +219,7 @@ const Navigation = () => {
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-              Bill Blister
+              InvoiceFlow
             </h1>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
