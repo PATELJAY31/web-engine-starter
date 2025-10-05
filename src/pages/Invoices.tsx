@@ -235,8 +235,19 @@ const Invoices = () => {
     const updatedItems = [...invoiceItems];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
     
+    // If product is selected, populate product details
+    if (field === 'product_id' && value) {
+      const selectedProduct = products.find(p => p.id === value);
+      if (selectedProduct) {
+        updatedItems[index].description = selectedProduct.name;
+        updatedItems[index].unit_price = selectedProduct.unit_price;
+        updatedItems[index].tax_rate = selectedProduct.tax_rate;
+        console.log("Product selected:", selectedProduct);
+      }
+    }
+    
     // Recalculate line total
-    if (field === 'quantity' || field === 'unit_price' || field === 'discount_percent') {
+    if (field === 'quantity' || field === 'unit_price' || field === 'discount_percent' || field === 'product_id') {
       const item = updatedItems[index];
       const subtotal = item.quantity * item.unit_price;
       const discount = subtotal * (item.discount_percent / 100);
@@ -280,8 +291,24 @@ const Invoices = () => {
   };
 
   const handleCreateInvoice = async () => {
+    console.log("Creating invoice with data:", {
+      customer_id: currentInvoice.customer_id,
+      invoiceItems: invoiceItems,
+      currentInvoice: currentInvoice
+    });
+
     if (!currentInvoice.customer_id || invoiceItems.length === 0) {
       toast.error("Please select a customer and add at least one item");
+      return;
+    }
+
+    // Validate that all invoice items have required fields
+    const invalidItems = invoiceItems.filter(item => 
+      !item.description || !item.quantity || !item.unit_price
+    );
+    
+    if (invalidItems.length > 0) {
+      toast.error("Please fill in all required fields for invoice items");
       return;
     }
 
@@ -289,47 +316,110 @@ const Invoices = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Temporarily skip profile check to avoid 406 errors
-      // const { data: userProfile } = await (supabase as any)
-      //   .from('profiles')
-      //   .select('*')
-      //   .eq('id', user.id)
-      //   .single();
-
-      // if (!userProfile) {
-      //   toast.error("User profile not found");
-      //   return;
-      // }
+      // TEMPORARY: Skip profile creation due to RLS issues
+      // Just use the user ID directly and handle the constraint differently
+      console.log("Using user ID for created_by:", user.id);
 
       // Create invoice
-      const { data: invoiceData, error: invoiceError } = await (supabase as any)
+      const invoiceData = {
+        customer_id: currentInvoice.customer_id,
+        invoice_number: generateInvoiceNumber(),
+        status: 'draft',
+        issue_date: currentInvoice.issue_date,
+        due_date: currentInvoice.due_date,
+        subtotal: currentInvoice.subtotal,
+        tax_amount: currentInvoice.tax_amount,
+        discount_amount: currentInvoice.discount_amount || 0,
+        total_amount: currentInvoice.total_amount,
+        paid_amount: 0,
+        notes: currentInvoice.notes,
+        terms: currentInvoice.terms,
+        created_by: null // Temporarily set to null until constraint is fixed
+      };
+
+      console.log("Creating invoice with data:", invoiceData);
+
+      const { data: invoiceResult, error: invoiceError } = await (supabase as any)
         .from('invoices')
-        .insert({
-          customer_id: currentInvoice.customer_id,
-          invoice_number: generateInvoiceNumber(),
-          status: 'draft',
-          issue_date: currentInvoice.issue_date,
-          due_date: currentInvoice.due_date,
-          subtotal: currentInvoice.subtotal,
-          tax_amount: currentInvoice.tax_amount,
-          discount_amount: currentInvoice.discount_amount || 0,
-          total_amount: currentInvoice.total_amount,
-          paid_amount: 0,
-          notes: currentInvoice.notes,
-          terms: currentInvoice.terms,
-          created_by: user.id
-        })
+        .insert(invoiceData)
         .select()
         .single();
 
       if (invoiceError) {
-        toast.error("Failed to create invoice");
+        console.error("Invoice creation error:", invoiceError);
+        
+        // If it's a foreign key constraint error, try without created_by
+        if (invoiceError.code === '23503' && invoiceError.message.includes('created_by_fkey')) {
+          console.log("Retrying invoice creation without created_by field...");
+          
+          const { data: retryResult, error: retryError } = await (supabase as any)
+            .from('invoices')
+            .insert({
+              customer_id: currentInvoice.customer_id,
+              invoice_number: generateInvoiceNumber(),
+              status: 'draft',
+              issue_date: currentInvoice.issue_date,
+              due_date: currentInvoice.due_date,
+              subtotal: currentInvoice.subtotal,
+              tax_amount: currentInvoice.tax_amount,
+              discount_amount: currentInvoice.discount_amount || 0,
+              total_amount: currentInvoice.total_amount,
+              paid_amount: 0,
+              notes: currentInvoice.notes,
+              terms: currentInvoice.terms
+              // created_by omitted
+            })
+            .select()
+            .single();
+
+          if (retryError) {
+            console.error("Retry invoice creation error:", retryError);
+            toast.error("Failed to create invoice: " + retryError.message);
+            return;
+          }
+          
+          console.log("Invoice created successfully (without created_by):", retryResult);
+          // Use retryResult for invoice items
+          const itemsToInsert = invoiceItems.map(item => ({
+            invoice_id: retryResult.id,
+            product_id: item.product_id || null,
+            description: item.description,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            tax_rate: item.tax_rate,
+            discount_percent: item.discount_percent,
+            line_total: item.line_total
+          }));
+
+          console.log("Creating invoice items:", itemsToInsert);
+
+          const { error: itemsError } = await (supabase as any)
+            .from('invoice_items')
+            .insert(itemsToInsert);
+
+          if (itemsError) {
+            console.error("Invoice items creation error:", itemsError);
+            toast.error("Failed to create invoice items: " + itemsError.message);
+            return;
+          }
+
+          console.log("Invoice items created successfully");
+          toast.success("Invoice created successfully!");
+          setShowCreateDialog(false);
+          resetForm();
+          fetchInvoices();
+          return;
+        }
+        
+        toast.error("Failed to create invoice: " + invoiceError.message);
         return;
       }
 
+      console.log("Invoice created successfully:", invoiceResult);
+
       // Create invoice items
       const itemsToInsert = invoiceItems.map(item => ({
-        invoice_id: invoiceData.id,
+        invoice_id: invoiceResult.id,
         product_id: item.product_id || null,
         description: item.description,
         quantity: item.quantity,
@@ -339,14 +429,19 @@ const Invoices = () => {
         line_total: item.line_total
       }));
 
+      console.log("Creating invoice items:", itemsToInsert);
+
       const { error: itemsError } = await (supabase as any)
         .from('invoice_items')
         .insert(itemsToInsert);
 
       if (itemsError) {
-        toast.error("Failed to create invoice items");
+        console.error("Invoice items creation error:", itemsError);
+        toast.error("Failed to create invoice items: " + itemsError.message);
         return;
       }
+
+      console.log("Invoice items created successfully");
 
       toast.success("Invoice created successfully!");
       setShowCreateDialog(false);
@@ -590,13 +685,8 @@ const Invoices = () => {
                                 <Select 
                                   value={item.product_id} 
                                   onValueChange={(value) => {
-                                    const product = products.find(p => p.id === value);
+                                    console.log("Product selected:", value);
                                     updateInvoiceItem(index, 'product_id', value);
-                                    if (product) {
-                                      updateInvoiceItem(index, 'description', product.name);
-                                      updateInvoiceItem(index, 'unit_price', product.unit_price);
-                                      updateInvoiceItem(index, 'tax_rate', product.tax_rate);
-                                    }
                                   }}
                                 >
                                   <SelectTrigger>
