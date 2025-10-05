@@ -78,43 +78,39 @@ const Products = () => {
   });
 
   useEffect(() => {
+    console.log("Products page mounted - starting data fetch");
     fetchProducts();
     fetchCategories();
   }, []);
 
   const fetchProducts = async () => {
     try {
+      console.log("Fetching products...");
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        toast.error("Company not found");
+      if (!user) {
+        console.log("No user found, returning");
         return;
       }
 
+      console.log("User authenticated:", user.email);
       const { data, error } = await supabase
         .from('products')
         .select(`
           *,
           category:product_categories(name, description)
         `)
-        .eq('company_id', userProfile.company_id)
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error("Error fetching products:", error);
         toast.error("Failed to fetch products");
         return;
       }
 
+      console.log("Products fetched successfully:", data?.length || 0, "products");
       setProducts(data || []);
     } catch (error) {
+      console.error("Error in fetchProducts:", error);
       toast.error("Error fetching products");
     } finally {
       setLoading(false);
@@ -126,21 +122,9 @@ const Products = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        return;
-      }
-
       const { data, error } = await supabase
         .from('product_categories')
         .select('*')
-        .eq('company_id', userProfile.company_id)
         .order('name');
 
       if (error) {
@@ -166,22 +150,9 @@ const Products = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        toast.error("Company not found");
-        return;
-      }
-
       const { error } = await supabase
         .from('product_categories')
         .insert({
-          company_id: userProfile.company_id,
           name: categoryFormData.name,
           description: categoryFormData.description || null
         });
@@ -217,22 +188,9 @@ const Products = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        toast.error("Company not found");
-        return;
-      }
-
       const { error } = await supabase
         .from('products')
         .insert({
-          company_id: userProfile.company_id,
           name: formData.name,
           sku: formData.sku || null,
           description: formData.description || null,

@@ -77,22 +77,9 @@ const Customers = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        toast.error("Company not found");
-        return;
-      }
-
       const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .eq('company_id', userProfile.company_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -120,22 +107,9 @@ const Customers = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        toast.error("Company not found");
-        return;
-      }
-
       const { error } = await supabase
         .from('customers')
         .insert({
-          company_id: userProfile.company_id,
           name: formData.name,
           email: formData.email || null,
           phone: formData.phone || null,

@@ -10,24 +10,29 @@ export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("AuthGuard: Setting up auth state listener");
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("AuthGuard: Auth state changed", { event, user: session?.user?.email });
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
         if (!session && event === 'SIGNED_OUT') {
+          console.log("AuthGuard: User signed out, redirecting to auth");
           navigate('/auth');
         }
       }
     );
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("AuthGuard: Initial session check", { user: session?.user?.email });
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
       
       if (!session) {
+        console.log("AuthGuard: No session found, redirecting to auth");
         navigate('/auth');
       }
     });

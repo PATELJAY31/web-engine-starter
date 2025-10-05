@@ -72,22 +72,9 @@ const Users = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        toast.error("Company not found");
-        return;
-      }
-
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
-        .eq('company_id', userProfile.company_id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -108,31 +95,18 @@ const Users = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        return;
-      }
-
       const { data, error } = await supabase
         .from('companies')
-        .select('*')
-        .eq('id', userProfile.company_id)
-        .single();
+        .select('*');
 
       if (error) {
-        console.error("Failed to fetch company:", error);
+        console.error("Failed to fetch companies:", error);
         return;
       }
 
-      setCompanies([data]);
+      setCompanies(data || []);
     } catch (error) {
-      console.error("Error fetching company:", error);
+      console.error("Error fetching companies:", error);
     }
   };
 
@@ -158,17 +132,6 @@ const Users = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get user's company ID
-      const { data: userProfile } = await supabase
-        .from('user_profiles')
-        .select('company_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!userProfile?.company_id) {
-        toast.error("Company not found");
-        return;
-      }
 
       // Create auth user
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -197,7 +160,6 @@ const Users = () => {
         .from('user_profiles')
         .insert({
           id: authData.user.id,
-          company_id: userProfile.company_id,
           first_name: formData.first_name,
           last_name: formData.last_name,
           email: formData.email,

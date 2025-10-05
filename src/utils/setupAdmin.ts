@@ -64,7 +64,6 @@ export const setupAdminUser = async () => {
       .from('user_profiles')
       .insert({
         id: authData.user.id,
-        company_id: companyData.id,
         first_name: 'Admin',
         last_name: 'User',
         email: 'admin@billblister.com',
@@ -139,7 +138,6 @@ export const fixAdminRole = async () => {
           .from('user_profiles')
           .insert({
             id: user.id,
-            company_id: newCompany.id,
             first_name: 'Admin',
             last_name: 'User',
             email: user.email || 'admin@billblister.com',
@@ -157,7 +155,6 @@ export const fixAdminRole = async () => {
           .from('user_profiles')
           .insert({
             id: user.id,
-            company_id: companyData.id,
             first_name: 'Admin',
             last_name: 'User',
             email: user.email || 'admin@billblister.com',
@@ -240,7 +237,6 @@ export const createCompleteAdminSetup = async () => {
       .from('user_profiles')
       .insert({
         id: user.id,
-        company_id: companyData.id,
         first_name: 'Admin',
         last_name: 'User',
         email: user.email || 'admin@billblister.com',
@@ -284,60 +280,11 @@ export const fixSpecificAdminUser = async () => {
       return true;
     }
 
-    // Check if any company exists
-    const { data: existingCompany } = await supabase
-      .from('companies')
-      .select('id')
-      .limit(1)
-      .single();
-
-    let companyId;
-
-    if (existingCompany) {
-      companyId = existingCompany.id;
-      console.log("Using existing company:", companyId);
-    } else {
-      // Try to create company using RPC function or direct SQL
-      toast.info("Creating company... This might require database permissions.");
-      
-      // First, let's try to create a company with a simple approach
-      const { data: newCompany, error: companyError } = await supabase
-        .from('companies')
-        .insert({
-          name: 'InvoiceFlow Company',
-          email: 'admin@billblister.com',
-          phone: '+1 (555) 123-4567',
-          address: '123 Business Street',
-          city: 'Business City',
-          state: 'Business State',
-          country: 'United States',
-          postal_code: '12345',
-          tax_id: 'TAX123456789',
-          currency: 'USD'
-        })
-        .select()
-        .single();
-
-      if (companyError) {
-        if (companyError.code === '42501') {
-          toast.error("Permission denied. Please run this SQL in Supabase Dashboard:");
-          toast.error("INSERT INTO companies (name, email, phone, address, city, state, country, postal_code, tax_id, currency) VALUES ('InvoiceFlow Company', 'admin@billblister.com', '+1 (555) 123-4567', '123 Business Street', 'Business City', 'Business State', 'United States', '12345', 'TAX123456789', 'USD');");
-          return false;
-        }
-        toast.error("Failed to create company: " + JSON.stringify(companyError));
-        return false;
-      }
-
-      companyId = newCompany.id;
-      console.log("Created new company:", companyId);
-    }
-
-    // Create user profile for the existing auth user
+    // Create user profile without company dependency
     const { error: profileError } = await supabase
       .from('user_profiles')
       .insert({
         id: user.id,
-        company_id: companyId,
         first_name: 'Admin',
         last_name: 'User',
         email: user.email || 'admin@billblister.com',
@@ -403,19 +350,18 @@ export const createSampleData = async () => {
     // Get user's company ID
     const { data: userProfile } = await supabase
       .from('user_profiles')
-      .select('company_id')
+      .select('role')
       .eq('id', user.id)
       .single();
 
-    if (!userProfile?.company_id) {
-      toast.error("Company not found");
+    if (!userProfile) {
+      toast.error("User profile not found");
       return false;
     }
 
     // Create sample customers
     const { error: customersError } = await supabase.from('customers').insert([
       {
-        company_id: userProfile.company_id,
         name: 'Acme Corporation',
         email: 'contact@acme.com',
         phone: '+1 (555) 100-0001',
@@ -430,7 +376,6 @@ export const createSampleData = async () => {
         status: 'active'
       },
       {
-        company_id: userProfile.company_id,
         name: 'TechStart Inc',
         email: 'hello@techstart.com',
         phone: '+1 (555) 200-0002',
@@ -445,7 +390,6 @@ export const createSampleData = async () => {
         status: 'active'
       },
       {
-        company_id: userProfile.company_id,
         name: 'Global Solutions Ltd',
         email: 'info@globalsolutions.com',
         phone: '+1 (555) 300-0003',
@@ -469,17 +413,14 @@ export const createSampleData = async () => {
     // Create sample product categories
     const { data: categoriesData, error: categoriesError } = await supabase.from('product_categories').insert([
       {
-        company_id: userProfile.company_id,
         name: 'Software Development',
         description: 'Custom software development services'
       },
       {
-        company_id: userProfile.company_id,
         name: 'Consulting',
         description: 'Business and technical consulting services'
       },
       {
-        company_id: userProfile.company_id,
         name: 'Support & Maintenance',
         description: 'Ongoing support and maintenance services'
       }
@@ -493,7 +434,6 @@ export const createSampleData = async () => {
     // Create sample products
     const { error: productsError } = await supabase.from('products').insert([
       {
-        company_id: userProfile.company_id,
         category_id: categoriesData[0].id,
         name: 'Web Application Development',
         sku: 'WEB-DEV-001',
@@ -505,7 +445,6 @@ export const createSampleData = async () => {
         status: 'active'
       },
       {
-        company_id: userProfile.company_id,
         category_id: categoriesData[0].id,
         name: 'Mobile App Development',
         sku: 'MOBILE-DEV-001',
@@ -517,7 +456,6 @@ export const createSampleData = async () => {
         status: 'active'
       },
       {
-        company_id: userProfile.company_id,
         category_id: categoriesData[1].id,
         name: 'Business Strategy Consulting',
         sku: 'CONSULT-001',
@@ -529,7 +467,6 @@ export const createSampleData = async () => {
         status: 'active'
       },
       {
-        company_id: userProfile.company_id,
         category_id: categoriesData[2].id,
         name: 'Monthly Support Package',
         sku: 'SUPPORT-001',

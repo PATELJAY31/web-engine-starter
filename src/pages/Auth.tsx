@@ -85,14 +85,27 @@ const Auth = () => {
             </Button>
           </form>
           
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="h-4 w-4 text-blue-600" />
-              <h4 className="font-medium text-blue-900">Admin-Only Account Creation</h4>
+          <div className="mt-6 space-y-4">
+            <div className="text-center">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/admin-signup')}
+                className="w-full"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Create Admin Account
+              </Button>
             </div>
-            <p className="text-sm text-blue-800">
-              Only administrators can create new employee accounts. If you need access, please contact your system administrator.
-            </p>
+            
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="h-4 w-4 text-blue-600" />
+                <h4 className="font-medium text-blue-900">Admin Access</h4>
+              </div>
+              <p className="text-sm text-blue-800">
+                Create an admin account to access all features including invoice management, customer management, and user administration.
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
