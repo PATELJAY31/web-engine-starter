@@ -27,6 +27,7 @@ import {
   UserX,
   Eye,
   EyeOff,
+  Database,
   Copy,
   CheckCircle,
   AlertCircle
@@ -104,14 +105,10 @@ const AdminUserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      console.log("Fetching users for admin management...");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log("No user found for user management");
         return;
       }
-
-      console.log("User authenticated for user management:", user.email);
 
       const { data, error } = await (supabase as any)
         .from('profiles')
@@ -124,7 +121,6 @@ const AdminUserManagement = () => {
         return;
       }
 
-      console.log("Users fetched successfully:", data?.length || 0, "users");
       setUsers(data || []);
       calculateStats(data || []);
     } catch (error) {
@@ -185,8 +181,6 @@ const AdminUserManagement = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      console.log("Creating user with data:", formData);
-
       // Create auth user with temporary password
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: formData.email,
@@ -202,11 +196,21 @@ const AdminUserManagement = () => {
 
       if (authError) {
         console.error("Auth user creation error:", authError);
-        toast.error("Failed to create user account: " + authError.message);
+        
+        // Handle specific error cases
+        if (authError.message.includes("User not allowed")) {
+          toast.error("Permission denied: You don't have admin privileges to create users. Please contact your system administrator.");
+        } else if (authError.message.includes("Invalid email")) {
+          toast.error("Invalid email address format.");
+        } else if (authError.message.includes("Password should be")) {
+          toast.error("Password doesn't meet security requirements.");
+        } else {
+          toast.error("Failed to create user account: " + authError.message);
+        }
+        
+        setLoading(false);
         return;
       }
-
-      console.log("Auth user created successfully:", authData.user?.id);
 
       // Create user profile
       const { error: profileError } = await (supabase as any)
@@ -227,8 +231,6 @@ const AdminUserManagement = () => {
         toast.error("Failed to create user profile: " + profileError.message);
         return;
       }
-
-      console.log("User profile created successfully");
 
       toast.success("User account created successfully!");
       toast.info("User will be required to change password on first login");
@@ -394,40 +396,19 @@ const AdminUserManagement = () => {
     <Layout>
       <div className="space-y-8">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">User Management</h1>
-            <p className="text-muted-foreground">
-              Admin-only: Create and manage user accounts
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              User Management
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Create and manage user accounts with role-based access control.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => fetchUsers()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={async () => {
-                const { data: { user } } = await supabase.auth.getUser();
-                console.log("Current user:", user?.email);
-                console.log("User metadata:", user?.user_metadata);
-                
-                const { data: profile } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('id', user?.id)
-                  .single();
-                console.log("User profile:", profile);
-                toast.info(`Current role: ${profile?.status || 'unknown'}`);
-              }}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              Check Role
-            </Button>
+          <div className="flex gap-3">
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>
-                <Button onClick={resetForm}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button onClick={resetForm} size="lg" className="shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Plus className="h-5 w-5 mr-2" />
                   Create User
                 </Button>
               </DialogTrigger>
@@ -436,6 +417,10 @@ const AdminUserManagement = () => {
                   <DialogTitle>Create New User Account</DialogTitle>
                   <DialogDescription>
                     Create a new user account with temporary password. User will be required to change password on first login.
+                    <br />
+                    <span className="text-orange-600 text-sm font-medium">
+                      Note: You need admin privileges in Supabase to create users.
+                    </span>
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleCreateUser} className="space-y-4">
@@ -579,7 +564,40 @@ const AdminUserManagement = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Help Section */}
+        <Card className="border-orange-200 bg-orange-50/50">
+          <CardHeader>
+            <CardTitle className="text-orange-800 flex items-center">
+              <Shield className="h-5 w-5 mr-2" />
+              Admin Privileges Required
+            </CardTitle>
+            <CardDescription className="text-orange-700">
+              To create user accounts, you need admin privileges in your Supabase project.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-sm text-orange-800">
+              <p className="font-medium mb-2">If you're getting "User not allowed" errors:</p>
+              <ol className="list-decimal list-inside space-y-1 ml-2">
+                <li>Go to your Supabase Dashboard</li>
+                <li>Navigate to Authentication → Users</li>
+                <li>Click "Add user" to create users manually</li>
+                <li>Or contact your system administrator for admin privileges</li>
+              </ol>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => window.open('https://supabase.com/dashboard', '_blank')}
+                className="border-orange-300 text-orange-700 hover:bg-orange-100"
+              >
+                <Database className="h-4 w-4 mr-2" />
+                Open Supabase Dashboard
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card>
             <CardContent className="p-6">

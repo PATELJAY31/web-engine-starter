@@ -113,14 +113,11 @@ const Payments = () => {
 
   const fetchPayments = async () => {
     try {
-      console.log("Fetching payments...");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log("No user found, returning");
         return;
       }
 
-      console.log("User authenticated:", user.email);
       const { data, error } = await (supabase as any)
         .from('payments')
         .select(`
@@ -139,7 +136,6 @@ const Payments = () => {
         return;
       }
 
-      console.log("Payments fetched successfully:", data?.length || 0, "payments");
       setPayments(data || []);
       calculateStats(data || []);
     } catch (error) {
@@ -152,14 +148,10 @@ const Payments = () => {
 
   const fetchInvoices = async () => {
     try {
-      console.log("Fetching invoices for payment...");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log("No user found for invoice fetch");
         return;
       }
-
-      console.log("User authenticated for invoice fetch:", user.email);
 
       // Fetch invoices that can receive payments (not already fully paid)
       const { data, error } = await (supabase as any)
@@ -182,8 +174,6 @@ const Payments = () => {
         return;
       }
 
-      console.log("Invoices fetched successfully:", data?.length || 0, "invoices");
-      console.log("Invoice data:", data);
       setInvoices(data || []);
     } catch (error) {
       console.error("Error fetching invoices:", error);
@@ -242,8 +232,6 @@ const Payments = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      console.log("Creating payment with data:", formData);
-
       // Get invoice details
       const selectedInvoice = invoices.find(inv => inv.id === formData.invoice_id);
       if (!selectedInvoice) {
@@ -262,8 +250,6 @@ const Payments = () => {
         // Removed status field as it doesn't exist in the database schema
       };
 
-      console.log("Payment data:", paymentData);
-
       const { data: paymentResult, error: paymentError } = await (supabase as any)
         .from('payments')
         .insert(paymentData)
@@ -275,8 +261,6 @@ const Payments = () => {
         toast.error("Failed to create payment: " + paymentError.message);
         return;
       }
-
-      console.log("Payment created successfully:", paymentResult);
 
       // Update invoice paid amount
       const newPaidAmount = (selectedInvoice.paid_amount || 0) + parseFloat(formData.amount);
@@ -440,25 +424,27 @@ const Payments = () => {
     <Layout>
       <div className="space-y-8">
         <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Payments</h1>
-          <p className="text-muted-foreground">
-            Track and manage customer payments
-          </p>
-        </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => fetchPayments()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Payments
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Track and manage all payment transactions and records.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => fetchPayments()} size="lg" className="hover:bg-primary/5 transition-colors">
+              <RefreshCw className="h-5 w-5 mr-2" />
               Refresh
             </Button>
-            <Button variant="outline" onClick={exportPayments}>
-              <Download className="h-4 w-4 mr-2" />
+            <Button variant="outline" onClick={exportPayments} size="lg" className="hover:bg-primary/5 transition-colors">
+              <Download className="h-5 w-5 mr-2" />
               Export
             </Button>
             <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
               <DialogTrigger asChild>
-                <Button onClick={resetForm}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button onClick={resetForm} size="lg" className="shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Plus className="h-5 w-5 mr-2" />
                   Record Payment
                 </Button>
               </DialogTrigger>

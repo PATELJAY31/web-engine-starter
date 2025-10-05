@@ -176,7 +176,6 @@ const Invoices = () => {
       }
 
       setCustomers(data || []);
-      console.log("Fetched customers:", data);
     } catch (error) {
       console.error("Error fetching customers:", error);
     }
@@ -242,7 +241,6 @@ const Invoices = () => {
         updatedItems[index].description = selectedProduct.name;
         updatedItems[index].unit_price = selectedProduct.unit_price;
         updatedItems[index].tax_rate = selectedProduct.tax_rate;
-        console.log("Product selected:", selectedProduct);
       }
     }
     
@@ -291,12 +289,6 @@ const Invoices = () => {
   };
 
   const handleCreateInvoice = async () => {
-    console.log("Creating invoice with data:", {
-      customer_id: currentInvoice.customer_id,
-      invoiceItems: invoiceItems,
-      currentInvoice: currentInvoice
-    });
-
     if (!currentInvoice.customer_id || invoiceItems.length === 0) {
       toast.error("Please select a customer and add at least one item");
       return;
@@ -318,7 +310,6 @@ const Invoices = () => {
 
       // TEMPORARY: Skip profile creation due to RLS issues
       // Just use the user ID directly and handle the constraint differently
-      console.log("Using user ID for created_by:", user.id);
 
       // Create invoice
       const invoiceData = {
@@ -337,8 +328,6 @@ const Invoices = () => {
         created_by: null // Temporarily set to null until constraint is fixed
       };
 
-      console.log("Creating invoice with data:", invoiceData);
-
       const { data: invoiceResult, error: invoiceError } = await (supabase as any)
         .from('invoices')
         .insert(invoiceData)
@@ -350,7 +339,6 @@ const Invoices = () => {
         
         // If it's a foreign key constraint error, try without created_by
         if (invoiceError.code === '23503' && invoiceError.message.includes('created_by_fkey')) {
-          console.log("Retrying invoice creation without created_by field...");
           
           const { data: retryResult, error: retryError } = await (supabase as any)
             .from('invoices')
@@ -378,7 +366,6 @@ const Invoices = () => {
             return;
           }
           
-          console.log("Invoice created successfully (without created_by):", retryResult);
           // Use retryResult for invoice items
           const itemsToInsert = invoiceItems.map(item => ({
             invoice_id: retryResult.id,
@@ -391,8 +378,6 @@ const Invoices = () => {
             line_total: item.line_total
           }));
 
-          console.log("Creating invoice items:", itemsToInsert);
-
           const { error: itemsError } = await (supabase as any)
             .from('invoice_items')
             .insert(itemsToInsert);
@@ -403,7 +388,6 @@ const Invoices = () => {
             return;
           }
 
-          console.log("Invoice items created successfully");
           toast.success("Invoice created successfully!");
           setShowCreateDialog(false);
           resetForm();
@@ -414,8 +398,6 @@ const Invoices = () => {
         toast.error("Failed to create invoice: " + invoiceError.message);
         return;
       }
-
-      console.log("Invoice created successfully:", invoiceResult);
 
       // Create invoice items
       const itemsToInsert = invoiceItems.map(item => ({
@@ -429,8 +411,6 @@ const Invoices = () => {
         line_total: item.line_total
       }));
 
-      console.log("Creating invoice items:", itemsToInsert);
-
       const { error: itemsError } = await (supabase as any)
         .from('invoice_items')
         .insert(itemsToInsert);
@@ -440,8 +420,6 @@ const Invoices = () => {
         toast.error("Failed to create invoice items: " + itemsError.message);
         return;
       }
-
-      console.log("Invoice items created successfully");
 
       toast.success("Invoice created successfully!");
       setShowCreateDialog(false);
@@ -685,7 +663,6 @@ const Invoices = () => {
                                 <Select 
                                   value={item.product_id} 
                                   onValueChange={(value) => {
-                                    console.log("Product selected:", value);
                                     updateInvoiceItem(index, 'product_id', value);
                                   }}
                                 >

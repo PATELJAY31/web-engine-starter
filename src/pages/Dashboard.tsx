@@ -5,10 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Layout from "@/components/Layout";
-import { fixSpecificAdminUser, createDatabaseSchema } from "@/utils/setupAdmin";
-import { testDatabaseConnection } from "@/utils/testDatabase";
-import { debugProfilesTable } from "@/utils/debugDatabase";
-import { testAdminProfile } from "@/utils/testAdminProfile";
 import { 
   FileText, 
   Users, 
@@ -20,9 +16,7 @@ import {
   CheckCircle,
   Clock,
   Plus,
-  BarChart3,
-  Database,
-  Shield
+  BarChart3
 } from "lucide-react";
 
 interface DashboardStats {
@@ -231,88 +225,41 @@ const Dashboard = () => {
       <div className="space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Overview of your invoice management system
+          <div className="space-y-1">
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Welcome back! Here's what's happening with your business.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline"
-              onClick={async () => {
-                const success = await createDatabaseSchema();
-              }}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Check Database
+          <div className="flex gap-3">
+            <Button onClick={() => navigate('/invoices')} size="lg" className="shadow-lg hover:shadow-xl transition-all duration-200">
+              <Plus className="h-5 w-5 mr-2" />
+              Create Invoice
             </Button>
-            <Button 
-              variant="outline"
-              onClick={async () => {
-                const success = await fixSpecificAdminUser();
-                if (success) {
-                  window.location.reload();
-                }
-              }}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Fix Admin Setup
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={async () => {
-                const results = await testDatabaseConnection();
-                console.log("Database test results:", results);
-                toast.info("Check console for database test results");
-              }}
-            >
-              <Database className="h-4 w-4 mr-2" />
-              Test Database
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={async () => {
-                const results = await debugProfilesTable();
-                console.log("Profiles debug results:", results);
-                toast.info("Check console for profiles debug results");
-              }}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              Debug Profiles
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => {
-                console.log("Admin profile test skipped - 406 errors with profiles table");
-                toast.info("Profile test skipped due to RLS issues");
-              }}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              Test Admin Profile (Skipped)
-            </Button>
-            <Button onClick={() => navigate('/invoices')}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Invoice
+            <Button variant="outline" onClick={() => navigate('/payments')} size="lg" className="hover:bg-primary/5 transition-colors">
+              <CreditCard className="h-5 w-5 mr-2" />
+              Record Payment
             </Button>
           </div>
         </div>
 
         {/* Invoice Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat) => (
-            <Card key={stat.title} className="shadow-card hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+            <Card key={stat.title} className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-background to-muted/20 backdrop-blur-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   {stat.title}
                 </CardTitle>
-                <div className={`${stat.bgColor} p-2 rounded-lg`}>
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                <div className={`${stat.bgColor} p-3 rounded-xl group-hover:scale-110 transition-transform duration-200`}>
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-3xl font-bold mb-1">{stat.value}</div>
+                <p className="text-xs text-muted-foreground">
                   {stat.title === "Total Invoices" && "All invoices"}
                   {stat.title === "Paid Invoices" && "Successfully paid"}
                   {stat.title === "Unpaid Invoices" && "Awaiting payment"}
@@ -324,20 +271,20 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {quickActionCards.map((card) => (
-            <Card key={card.title} className="shadow-card hover:shadow-lg transition-shadow cursor-pointer" onClick={card.action}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card key={card.title} className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-gradient-to-br from-background to-muted/10 backdrop-blur-sm hover:from-primary/5 hover:to-primary/10" onClick={card.action}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                 <CardTitle className="text-sm font-medium">
                   {card.title}
                 </CardTitle>
-                <div className={`${card.bgColor} p-2 rounded-lg`}>
-                  <card.icon className={`h-4 w-4 ${card.color}`} />
+                <div className={`${card.bgColor} p-3 rounded-xl group-hover:scale-110 transition-transform duration-200`}>
+                  <card.icon className={`h-5 w-5 ${card.color}`} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{card.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="text-3xl font-bold mb-1">{card.value}</div>
+                <p className="text-xs text-muted-foreground">
                   Click to view details
                 </p>
               </CardContent>

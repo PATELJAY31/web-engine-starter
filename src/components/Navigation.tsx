@@ -96,16 +96,8 @@ const Navigation = () => {
       roles: ["admin", "accountant", "sales", "viewer"]
     },
     {
-      id: "users",
-      label: "User Management",
-      icon: Users,
-      path: "/users",
-      roles: ["admin"],
-      badge: "Admin"
-    },
-    {
       id: "admin-users",
-      label: "Admin User Management",
+      label: "User Management",
       icon: Users,
       path: "/admin/users",
       roles: ["admin"],
@@ -180,16 +172,20 @@ const Navigation = () => {
     return (
       <Button
         variant={isActive ? "default" : "ghost"}
-        className={`w-full justify-start ${isActive ? "bg-primary text-primary-foreground" : ""}`}
+        className={`w-full justify-start h-12 px-4 transition-all duration-200 ${
+          isActive 
+            ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg" 
+            : "hover:bg-primary/5 hover:text-primary"
+        }`}
         onClick={() => {
           navigate(item.path);
           setIsMobileMenuOpen(false);
         }}
       >
-        <Icon className="h-4 w-4 mr-3" />
-        {item.label}
+        <Icon className="h-5 w-5 mr-3" />
+        <span className="font-medium">{item.label}</span>
         {item.badge && (
-          <Badge variant="secondary" className="ml-auto text-xs">
+          <Badge variant="secondary" className="ml-auto text-xs bg-primary/10 text-primary border-primary/20">
             {item.badge}
           </Badge>
         )}
@@ -226,9 +222,17 @@ const Navigation = () => {
         <div className="p-6 h-full flex flex-col">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-              InvoiceFlow
-            </h1>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center shadow-lg">
+                <FileText className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  InvoiceFlow
+                </h1>
+                <p className="text-xs text-muted-foreground">Business Management</p>
+              </div>
+            </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
                 Welcome back, {userName}

@@ -11,9 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Users, Plus, Search, Edit, Trash2, UserPlus, Eye, Mail, Phone, Shield, Calendar, Database } from "lucide-react";
+import { Users, Plus, Search, Edit, Trash2, UserPlus, Eye, Mail, Phone, Shield, Calendar } from "lucide-react";
 import { toast } from "sonner";
-import { setupAdminUser, createSampleData, fixAdminRole, createCompleteAdminSetup, fixSpecificAdminUser } from "@/utils/setupAdmin";
 
 interface UserProfile {
   id: string;
@@ -334,72 +333,6 @@ const Users = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            {users.length === 0 && (
-              <Button 
-                variant="outline" 
-                onClick={async () => {
-                  const success = await setupAdminUser();
-                  if (success) {
-                    fetchUsers();
-                  }
-                }}
-              >
-                <Database className="h-4 w-4 mr-2" />
-                Setup Admin
-              </Button>
-            )}
-            <Button 
-              variant="outline" 
-              onClick={async () => {
-                const success = await createSampleData();
-                if (success) {
-                  // Refresh the page to show new data
-                  window.location.reload();
-                }
-              }}
-            >
-              <Database className="h-4 w-4 mr-2" />
-              Create Sample Data
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={async () => {
-                const success = await fixAdminRole();
-                if (success) {
-                  // Refresh the page to show updated role
-                  window.location.reload();
-                }
-              }}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              Fix Admin Role
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={async () => {
-                const success = await createCompleteAdminSetup();
-                if (success) {
-                  // Refresh the page to show updated data
-                  window.location.reload();
-                }
-              }}
-            >
-              <Database className="h-4 w-4 mr-2" />
-              Complete Admin Setup
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={async () => {
-                const success = await fixSpecificAdminUser();
-                if (success) {
-                  // Refresh the page to show updated data
-                  window.location.reload();
-                }
-              }}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              Fix This Admin User
-            </Button>
             <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
               <DialogTrigger asChild>
                 <Button>

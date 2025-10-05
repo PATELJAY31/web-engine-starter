@@ -16,10 +16,11 @@ import Reports from "./pages/Reports";
 import Notifications from "./pages/Notifications";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
-import DatabaseViewer from "./pages/DatabaseViewer";
 import AdminSignup from "./pages/AdminSignup";
 import AdminUserManagement from "./pages/AdminUserManagement";
+import DatabaseViewer from "./pages/DatabaseViewer";
 import NotFound from "./pages/NotFound";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +34,7 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin-signup" element={<AdminSignup />} />
-          <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
+          <Route path="/dashboard" element={<AuthGuard><ErrorBoundary><Dashboard /></ErrorBoundary></AuthGuard>} />
           <Route path="/customers" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Customers /></RoleGuard></AuthGuard>} />
           <Route path="/products" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales"]}><Products /></RoleGuard></AuthGuard>} />
           <Route path="/invoices" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Invoices /></RoleGuard></AuthGuard>} />
