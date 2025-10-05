@@ -18,6 +18,7 @@ import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import DatabaseViewer from "./pages/DatabaseViewer";
 import AdminSignup from "./pages/AdminSignup";
+import AdminUserManagement from "./pages/AdminUserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/reports" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "viewer"]}><Reports /></RoleGuard></AuthGuard>} />
           <Route path="/notifications" element={<AuthGuard><RoleGuard allowedRoles={["admin", "accountant", "sales", "viewer"]}><Notifications /></RoleGuard></AuthGuard>} />
           <Route path="/users" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><Users /></RoleGuard></AuthGuard>} />
+          <Route path="/admin/users" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><AdminUserManagement /></RoleGuard></AuthGuard>} />
           <Route path="/database" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><DatabaseViewer /></RoleGuard></AuthGuard>} />
           <Route path="/settings" element={<AuthGuard><RoleGuard allowedRoles={["admin"]}><Settings /></RoleGuard></AuthGuard>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

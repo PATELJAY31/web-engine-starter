@@ -104,6 +104,14 @@ const Navigation = () => {
       badge: "Admin"
     },
     {
+      id: "admin-users",
+      label: "Admin User Management",
+      icon: Users,
+      path: "/admin/users",
+      roles: ["admin"],
+      badge: "Admin"
+    },
+    {
       id: "database",
       label: "Database Viewer",
       icon: Database,
